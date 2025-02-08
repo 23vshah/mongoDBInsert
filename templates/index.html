@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic JSON Creator</title>
+  <script>
+    function updateFormFields() {
+      const typeSelect = document.getElementById('type');
+      const selectedType = typeSelect.value;
+
+      const commonFields = document.getElementById('common-fields');
+      const prescribedFields = document.getElementById('prescribed-fields');
+      const bigListFields = document.getElementById('biglist-fields');
+      const shortListFields = document.getElementById('shortlist-fields');
+      const orFields = document.getElementById('or-fields');
+      const sequenceFields = document.getElementById('sequence-fields');
+
+      // Hide all optional fields initially
+      prescribedFields.style.display = 'none';
+      bigListFields.style.display = 'none';
+      shortListFields.style.display = 'none';
+      orFields.style.display = 'none';
+      sequenceFields.style.display = 'none';
+
+      // Show fields based on type
+      switch (selectedType) {
+        case '1':  // prescribed
+          prescribedFields.style.display = 'block';
+          break;
+        case '2':  // biglist
+          bigListFields.style.display = 'block';
+          break;
+        case '3':  // short_list
+          shortListFields.style.display = 'block';
+          break;
+        case '5':  // pick one
+          orFields.style.display = 'block';
+          break;
+        case '4':  // sequence
+          sequenceFields.style.display = 'block';
+          break;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateFormFields);
+  </script>
+  <style>
+    .form-group { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Create JSON Document</h1>
+  <form method="POST" action="/add">
+    <div class="form-group">
+      <label for="_id">_id:</label>
+      <input type="text" id="_id" name="_id" required>
+    </div>
+
+    <div class="form-group">
+      <label for="type">Type:</label>
+      <select id="type" name="type" onchange="updateFormFields()" required>
+        <option value="">-- Select Type --</option>
+        <option value="1">Prescribed</option>
+        <option value="2">Biglist</option>
+        <option value="3">Short List</option>
+        <option value="4">Sequence</option>
+        <option value="5">Pick One</option>
+      </select>
+    </div>
+
+    <div id="common-fields">
+      <div class="form-group">
+        <label for="grade">Grade (T/F):</label>
+        <input type="checkbox" id="grade" name="grade">
+      </div>
+    </div>
+
+    <div id="prescribed-fields" style="display:none;">
+      <div class="form-group">
+        <label for="courses">Courses (comma-separated):</label>
+        <input type="text" id="courses" name="courses">
+      </div>
+    </div>
+
+    <div id="biglist-fields" style="display:none;">
+      <div class="form-group">
+        <label for="list_names">List Names (comma-separated):</label>
+        <input type="text" id="list_names" name="list_names">
+      </div>
+      <div class="form-group">
+        <label for="metric_type_biglist">Metric Type:</label>
+        <select id="metric_type_biglist" name="metric_type">
+          <option value="1">Courses</option>
+          <option value="2">Credits</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="metric_value_biglist">Metric Value:</label>
+        <input type="number" id="metric_value_biglist" name="metric_value">
+      </div>
+      <div class="form-group">
+        <label for="exclude">Excluded Lists (comma-separated):</label>
+        <input type="text" id="exclude" name="exclude">
+      </div>
+      <div class="form-group">
+        <label for="excluded_courses">Excluded Courses (comma-separated):</label>
+        <input type="text" id="excluded_courses" name="excluded_courses">
+      </div>
+      <div class="form-group">
+        <label for="recommended_biglist">Recommended (comma-separated):</label>
+        <input type="text" id="recommended_biglist" name="recommended">
+      </div>
+    </div>
+
+    <div id="shortlist-fields" style="display:none;">
+      <div class="form-group">
+        <label for="metric_type_shortlist">Metric Type:</label>
+        <select id="metric_type_shortlist" name="metric_type_shortlist">
+          <option value="1">Courses</option>
+          <option value="2">Credits</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="courses_shortlist">Courses (comma-separated):</label>
+        <input type="text" id="courses_shortlist" name="courses_shortlist">
+      </div>
+      <div class="form-group">
+        <label for="metric_value_shortlist">Metric Value:</label>
+        <input type="number" id="metric_value_shortlist" name="metric_value_shortlist">
+      </div>
+      <div class="form-group">
+        <label for="recommended_shortlist">Recommended (comma-separated):</label>
+        <input type="text" id="recommended_shortlist" name="recommended_shortlist">
+      </div>
+    </div>
+
+    <div id="or-fields" style="display:none;">
+      <div class="form-group">
+        <label for="courses_or">Courses (comma-separated):</label>
+        <input type="text" id="courses_or" name="courses_or">
+      </div>
+    </div>
+
+    <div id="sequence-fields" style="display:none;">
+      <div class="form-group">
+        <label for="sequences">Sequences (semicolon-separated, use commas within sequences):</label>
+        <input type="text" id="sequences" name="sequences">
+      </div>
+    </div>
+
+    <button type="submit">Add</button>
+  </form>
+
+  <h2>Documents</h2>
+    <ul>
+      {% for document in documents %}
+        <li>{{ document }}</li>
+      {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('download') }}">Download JSON</a>
+</body>
+</html>

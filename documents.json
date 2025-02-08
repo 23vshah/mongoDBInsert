@@ -1,0 +1,10 @@
+[
+    {
+        "_id": "Hey",
+        "type": 1,
+        "grade": true,
+        "courses": [
+            "CMPSC132"
+        ]
+    }
+]
