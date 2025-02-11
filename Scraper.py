@@ -124,28 +124,30 @@ def get_major_requirements(url: str):
                     if course['Category'] != current_category_to_reqs:
                         if not courses_to_reqs:
                             current_category_to_reqs = course['Category']
-                            courses_to_reqs.append(course['Code'])
+                            courses_to_reqs.append(course['Code'].replace('\xa0', ' '))
                             continue
                         grade = False
-                        type = ""
-                        course_credits = None
-                        course_credits_value = None
+                        typeStr = ""
+                        metric_type = None
+                        metric_value = None
 
                         category = current_category_to_reqs
                         if "Prescribed" in category:
-                            type = 'P'
+                            typeStr = 'P'
                         elif "Select" in category:
-                            type = "sel"
-                            for x in courses_to_reqs:
-                                if x is list:
-                                    type = "seq"
+                            typeStr = "shortlist"
+                            for i in range(len(courses_to_reqs)):
+                                x = courses_to_reqs[i]
+                                if type(x) is list:
+                                    typeStr = "seq"
+                                    courses_to_reqs[i] = ",".join(courses_to_reqs[i])
                                     break
                                 if "credits" in category:
-                                    course_credits = 'credits'
+                                    metric_type = 'credits'
                                 else:
-                                    course_credits = "courses"
+                                    metric_type = "courses"
 
-                                course_credits_value = category[category.index('Select'):].split()[1].strip()
+                                metric_value = category[category.index('Select'):].split()[1].strip()
 
                         if "grade" in category:
                             if "grade of c or better" in category.lower():
@@ -154,13 +156,26 @@ def get_major_requirements(url: str):
                                 print("Grade but not proper format: " + category)
 
 
-                        obj = {'category': category, "type": type, 'grade': grade, 'course_credits': course_credits, 'course_credits_value': course_credits_value, 'courses': courses_to_reqs}
+                        obj = {'category': category, "type": typeStr, 'grade': grade, 'metric_type': metric_type, 'metric_value': metric_value, 'courses': courses_to_reqs}
                         requirements.append(obj)
                         courses_to_reqs = []
                         current_category_to_reqs = course['Category']
+                        if type(course['Code']) is list:
+                            for c in range(len(course['Code'])):
+                                course['Code'][c] = course['Code'][c].replace('\xa0', ' ')
+                        else:
+                            course['Code'] = course['Code'].replace('\xa0', ' ')
+
+
                         courses_to_reqs.append(course['Code'])
 
                     else:
+                        if type(course['Code']) is list:
+                            for c in range(len(course['Code'])):
+                                course['Code'][c] = course['Code'][c].replace('\xa0', ' ')
+                        else:
+                            course['Code'] = course['Code'].replace('\xa0', ' ')
+
                         courses_to_reqs.append(course['Code'])
         else:
             grade = False
@@ -173,12 +188,60 @@ def get_major_requirements(url: str):
                 else:
                     print("Grade but not proper format: " + category)
 
-            type = 'or'
-            courses = [course['Code'] for course in group]
-            obj = {'category': category, "type": type, 'grade': grade, 'course_credits': None,
-                   'course_credits_value': None, 'courses': courses}
+            typeStr = 'or'
+            courses1 = []
+            for course in group:
+                if type(course['Code']) is list:
+                    typeStr = "seq"
+                    for c in range(len(course['Code'])):
+                        course['Code'][c] = course['Code'][c].replace('\xa0', ' ')
+                else:
+                    course['Code'] = course['Code'].replace('\xa0', ' ')
+
+                courses1.append(course['Code'])
+
+            obj = {'category': category, "type": typeStr, 'grade': grade, 'metric_type': None,
+                   'metric_value': None, 'courses': courses1}
             requirements.append(obj)
 
+    if not courses_to_reqs:
+        current_category_to_reqs = course['Category']
+        if type(course['Code']) is list:
+            for c in range(len(course['Code'])):
+                course['Code'][c] = course['Code'][c].replace('\xa0', ' ')
+        else:
+            course['Code'] = course['Code'].replace('\xa0', ' ')
+        courses_to_reqs.append(course['Code'])
+    grade = False
+    typeStr = ""
+    metric_type = None
+    metric_value = None
+
+    category = current_category_to_reqs
+    if "Prescribed" in category:
+        typeStr = 'P'
+    elif "Select" in category:
+        typeStr = "shortlist"
+        for x in courses_to_reqs:
+            if type(x) is list:
+                typeStr = "seq"
+                break
+            if "credits" in category:
+                metric_type = 'credits'
+            else:
+                metric_type = "courses"
+
+            metric_value = category[category.index('Select'):].split()[1].strip()
+
+    if "grade" in category:
+        if "grade of c or better" in category.lower():
+            grade = True
+        else:
+            print("Grade but not proper format: " + category)
+
+    obj = {'category': category, "type": typeStr, 'grade': grade, 'metric_type': metric_type,
+           'metric_value': metric_value, 'courses': courses_to_reqs}
+    requirements.append(obj)
 
 
 
@@ -187,5 +250,5 @@ def get_major_requirements(url: str):
 
 
 # Example usage (replace with the actual URL)
-url = "https://bulletins.psu.edu/undergraduate/colleges/engineering/computer-science-bs/#programrequirementstext"
+url = "https://bulletins.psu.edu/undergraduate/colleges/engineering/mechanical-engineering-bs/#programrequirementstext"
 print(get_major_requirements(url))

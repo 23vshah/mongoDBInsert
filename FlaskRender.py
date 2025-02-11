@@ -72,5 +72,8 @@ def download():
     json_data = json.dumps(documents, indent=4)
     return jsonify(documents)
 
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,99 @@
+[
+    {
+        "type": "P",
+        "grade": false,
+        "courses": [
+            "IE 312",
+            "MATH 231",
+            "MATSE 259",
+            "ME 390",
+            "ME 490"
+        ]
+    },
+    {
+        "type": "or",
+        "grade": false,
+        "courses": [
+            "CMPSC 200",
+            "CMPSC 201"
+        ]
+    },
+    {
+        "type": "or",
+        "grade": false,
+        "courses": [
+            "ME 440W",
+            "ME 441W"
+        ]
+    },
+    {
+        "type": "P",
+        "grade": true,
+        "courses": [
+            "CHEM 110",
+            "EDSGN 100",
+            "EMCH 211",
+            "EMCH 212",
+            "EMCH 213",
+            "ENGL 202C",
+            "MATH 140",
+            "MATH 141",
+            "MATH 220",
+            "MATH 251",
+            "ME 300",
+            "ME 320",
+            "ME 330",
+            "ME 340",
+            "ME 348",
+            "ME 360",
+            "ME 370",
+            "ME 410",
+            "ME 435",
+            "ME 450",
+            "ME 454",
+            "PHYS 211",
+            "PHYS 212"
+        ]
+    },
+    {
+        "type": "seq",
+        "grade": false,
+        "sequences": [
+            "BIOL 141",
+            "BIOL 161",
+            [
+                "CHEM 111",
+                "PHYS 214"
+            ],
+            "CHEM 112"
+        ]
+    },
+    {
+        "type": "or",
+        "grade": true,
+        "courses": [
+            "CAS 100A",
+            "CAS 100B"
+        ]
+    },
+    {
+        "type": "or",
+        "grade": true,
+        "courses": [
+            "ENGL 15",
+            "ENGL 30H"
+        ]
+    },
+    {
+        "type": "shortlist",
+        "grade": false,
+        "metric_type_shortlist": "credits",
+        "courses": [
+            "ECON 14",
+            "ECON 102",
+            "ECON 104"
+        ],
+        "metric_value_shortlist": 3,
+        "recommended": []
+    }
+]

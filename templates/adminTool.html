@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Tool</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        .data-item {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], select, input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .type-fields {
+            display: none; /* Initially hide all type-specific fields */
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Tool for Scraper Data Review</h1>
+
+    {% for item in scraper_data %}
+    <div class="data-item">
+        <h3>Item {{ loop.index }}</h3>
+
+        <div class="form-group">
+            <label for="type-{{ loop.index }}">Type:</label>
+            <select id="type-{{ loop.index }}" name="type" onchange="updateFormFields({{ loop.index }})" required>
+                <option value="">-- Select Type --</option>
+                <option value="P" {% if item.type == 'P' %}selected{% endif %}>Prescribed</option>
+                <option value="biglist" {% if item.type == 'biglist' %}selected{% endif %}>Biglist</option>
+                <option value="shortlist" {% if item.type == 'shortlist' %}selected{% endif %}>Short List</option>
+                <option value="seq" {% if item.type == 'seq' %}selected{% endif %}>Sequence</option>
+                <option value="or" {% if item.type == 'or' %}selected{% endif %}>Pick One</option>
+            </select>
+        </div>
+
+        <div id="common-fields-{{ loop.index }}">
+            <div class="form-group">
+                <label for="grade-{{ loop.index }}">Grade (T/F):</label>
+                <input type="checkbox" id="grade-{{ loop.index }}" name="grade" {% if item.grade %}checked{% endif %}>
+            </div>
+        </div>
+
+        <div id="prescribed-fields-{{ loop.index }}" class="type-fields" data-type="P">
+            <div class="form-group">
+                <label for="courses-{{ loop.index }}">Courses (comma-separated):</label>
+                <input type="text" id="courses-{{ loop.index }}" name="courses" value="{{ item.courses|join(', ') if item.courses is defined else '' }}">
+            </div>
+        </div>
+
+        <div id="biglist-fields-{{ loop.index }}" class="type-fields" data-type="biglist">
+            <div class="form-group">
+                <label for="list_names-{{ loop.index }}">List Names (comma-separated):</label>
+                <input type="text" id="list_names-{{ loop.index }}" name="list_names" value="{{ item.list_names|join(', ') if item.list_names is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="metric_type_biglist-{{ loop.index }}">Metric Type:</label>
+                <select id="metric_type_biglist-{{ loop.index }}" name="metric_type_biglist">
+                    <option value="courses" {% if item.metric_type == 'courses' %}selected{% endif %}>Courses</option>
+                    <option value="credits" {% if item.metric_type == 'credits' %}selected{% endif %}>Credits</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="metric_value_biglist-{{ loop.index }}">Metric Value:</label>
+                <input type="text" id="metric_value_biglist-{{ loop.index }}" name="metric_value_biglist" value="{{ item.course_credits_value if item.course_credits_value is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="exclude-{{ loop.index }}">Excluded Lists (comma-separated):</label>
+                <input type="text" id="exclude-{{ loop.index }}" name="exclude" value="{{ item.exclude|join(', ') if item.exclude is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="excluded_courses-{{ loop.index }}">Excluded Courses (comma-separated):</label>
+                <input type="text" id="excluded_courses-{{ loop.index }}" name="excluded_courses" value="{{ item.excluded_courses|join(', ') if item.excluded_courses is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="recommended_biglist-{{ loop.index }}">Recommended (comma-separated):</label>
+                <input type="text" id="recommended_biglist-{{ loop.index }}" name="recommended_biglist" value="{{ item.recommended|join(', ') if item.recommended is defined else '' }}">
+            </div>
+        </div>
+
+        <div id="shortlist-fields-{{ loop.index }}" class="type-fields" data-type="shortlist">
+            <div class="form-group">
+                <label for="metric_type_shortlist-{{ loop.index }}">Metric Type:</label>
+                <select id="metric_type_shortlist-{{ loop.index }}" name="metric_type_shortlist">
+                    <option value="courses" {% if item.metric_type == 'courses' %}selected{% endif %}>Courses</option>
+                    <option value="credits" {% if item.metric_type == 'credits' %}selected{% endif %}>Credits</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="metric_value_shortlist-{{ loop.index }}">Metric Value:</label>
+                <input type="text" id="metric_value_shortlist-{{ loop.index }}" name="metric_value_shortlist" value="{{ item.metric_value if item.metric_value is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="courses_shortlist-{{ loop.index }}">Courses (comma-separated):</label>
+                <input type="text" id="courses_shortlist-{{ loop.index }}" name="courses_shortlist" value="{{ item.courses|join(', ') if item.courses is defined else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="recommended_shortlist-{{ loop.index }}">Recommended (comma-separated):</label>
+                <input type="text" id="recommended_shortlist-{{ loop.index }}" name="recommended_shortlist" value="{{ item.recommended|join(', ') if item.recommended is defined else '' }}">
+            </div>
+        </div>
+
+        <div id="or-fields-{{ loop.index }}" class="type-fields" data-type="or">
+            <div class="form-group">
+                <label for="courses_or-{{ loop.index }}">Courses (comma-separated):</label>
+                <input type="text" id="courses_or-{{ loop.index }}" name="courses_or" value="{{ item.courses|join(', ') if item.courses is defined else '' }}">
+            </div>
+        </div>
+
+        <div id="sequence-fields-{{ loop.index }}" class="type-fields" data-type="seq">
+            <div class="form-group">
+                <label for="sequences-{{ loop.index }}">Sequences (semicolon-separated, use commas within sequences):</label>
+                <input type="text" id="sequences-{{ loop.index }}" name="sequences" value="{{ item.courses|join(';') if item.courses is defined else '' }}">
+            </div>
+        </div>
+
+        <button onclick="approveItem({{ loop.index }})">Approve</button>
+    </div>
+    {% endfor %}
+
+    <h2>Not Normal Courses</h2>
+    <ul>
+        {% for course in not_normal %}
+            <li>{{ course }}</li>
+        {% endfor %}
+    </ul>
+
+    <button onclick="saveAllTryCatch()">Save All</button>
+
+    <script>
+
+        function saveAllTryCatch()
+        {
+            try {
+                  saveAll();
+                } catch (error) {
+                  console.error(error.message);
+                }
+        }
+        function updateFormFields(index) {
+            const type = document.getElementById('type-' + index).value;
+            const fieldSets = document.querySelectorAll('.type-fields');
+
+            fieldSets.forEach(set => {
+                const setIndex = set.id.split('-')[2];
+                if (setIndex == index) {
+                    if (set.dataset.type === type) {
+                        set.style.display = 'block';
+                    } else {
+                        set.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Initialize form fields on load
+        window.onload = function() {
+            {% for item in scraper_data %}
+                updateFormFields({{ loop.index }});
+            {% endfor %}
+        };
+
+       function approveItem(index) {
+            // Make sure 'index' is properly converted to an integer
+            const itemIndex = parseInt(index, 10);
+
+            fetch('/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item: itemIndex })  // Send the integer index
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'approved') {
+                    alert('Item approved!');
+                }
+            });
+        }
+
+        function emptyOrList(str)
+        {
+            if(str.trim() === "")
+                        return [];
+            else
+                return str.split(',').map(c => c.trim());
+        }
+
+        function isNumeric(str) {
+              if (typeof str != "string") return false // we only process strings!
+              return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+                     !isNaN(parseInt(str)) // ...and ensure strings of whitespace fail
+            }
+        function saveAll() {
+            const allData = [];
+            const dataItems = document.querySelectorAll('.data-item');
+
+            console.log(dataItems);
+
+            dataItems.forEach((item, tempIndex) => {
+                const index = tempIndex + 1;
+                const type = document.getElementById('type-' + index).value;
+                const grade = item.querySelector('input[name="grade"]').checked;
+                let data = {
+                    type: type,
+                    grade: grade,
+                };
+
+                // Fetch data based on the selected type
+                if (type === 'P') {
+                    data.courses = document.getElementById('courses-' + index).value.split(',').map(c => c.trim());
+                } else if (type === 'biglist') {
+                    data.list_names = document.getElementById('list_names-' + index).value.split(',').map(c => c.trim());
+                    data.metric_type = document.getElementById('metric_type_biglist-' + index).value;
+                    const metricValue = document.getElementById('metric_value_biglist-' + index).value;
+                    if (isNumeric(metricValue))
+                    {
+                        data.metric_value = parseInt(metricValue);
+                    }
+                    else
+                    {
+                        alert("BIGLIST METRIC VALUE NOT A NUMBER");
+                        throw new Error("BIGLIST METRIC VALUE NOT A NUMBER");
+                    }
+                    let exclude = emptyOrList(document.getElementById('exclude-' + index).value);
+                    const excludedCourses = emptyOrList(document.getElementById('excluded_courses-' + index).value);
+                    if(excludedCourses.length !== 0)
+                        exclude.push(excludedCourses);
+                    data.exclude = exclude;
+                    data.recommended = emptyOrList(document.getElementById('recommended_biglist-' + index).value);
+                } else if (type === 'shortlist') {
+                    data.metric_type_shortlist = document.getElementById('metric_type_shortlist-' + index).value;
+                    data.courses = document.getElementById('courses_shortlist-' + index).value.split(',').map(c => c.trim());
+
+                    const metricValue = document.getElementById('metric_value_shortlist-' + index).value;
+                    if (isNumeric(metricValue))
+                    {
+                        data.metric_value_shortlist = parseInt(metricValue);
+                    }
+                    else
+                    {
+                        alert("SHORTLIST METRIC VALUE NOT A NUMBER");
+                        throw new Error("SHORTLIST METRIC VALUE NOT A NUMBER");
+                    }
+
+                    data.recommended = emptyOrList(document.getElementById('recommended_shortlist-' + index).value);
+                } else if (type === 'or') {
+                    data.courses = document.getElementById('courses_or-' + index).value.split(',').map(c => c.trim());
+                } else if (type === 'seq') {
+                    let sequences = document.getElementById('sequences-' + index).value.split(";");
+                    data.sequences = sequences.map(seq => seq.includes(",") ? seq.split(",") : seq);
+                    console.log(sequences.map(seq => seq.includes(",") ? seq.split(",") : seq));
+                }
+
+                allData.push(data);
+            });
+
+            fetch('/save_all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: allData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'saved') {
+                    alert('All data saved!');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
